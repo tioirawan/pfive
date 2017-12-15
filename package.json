@@ -1,6 +1,6 @@
 {
   "name": "pfive",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Simple p5 manager",
   "main": "program/main.js",
   "engines": {
@@ -16,12 +16,10 @@
   "author": "indmind",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.17.1",
     "chalk": "^2.3.0",
-    "cli-progress": "^1.6.1",
     "commander": "^2.12.2",
     "inquirer": "^4.0.1",
-    "npc": "0.0.1",
+    "mustache": "^2.3.0",
     "progress": "^2.0.0",
     "url-parse": "^1.2.0"
   }
