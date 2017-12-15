@@ -1,6 +1,6 @@
 {
   "name": "pfive",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Simple p5 manager",
   "main": "program/main.js",
   "engines": {
@@ -22,5 +22,19 @@
     "mustache": "^2.3.0",
     "progress": "^2.0.0",
     "url-parse": "^1.2.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Indmind/pfive.git"
+  },
+  "keywords": [
+    "pfive",
+    "p5",
+    "manager"
+  ],
+  "bugs": {
+    "url": "https://github.com/Indmind/pfive/issues"
+  },
+  "homepage": "https://github.com/Indmind/pfive#readme"
 }
