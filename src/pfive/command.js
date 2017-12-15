@@ -22,7 +22,7 @@ module.exports.run = () => {
 
     program
         .command("add-lib")
-        .alias("il")
+        .alias("al")
         .action(() => generator.addLib(process.cwd()))
 
 
