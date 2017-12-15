@@ -9,6 +9,9 @@
 </head>
 <body>
     
-    <script src="assets/js/script.js"></script>
+    {{#libs}}
+        <script src="{{{.}}}"></script>
+    {{/libs}}
+        <script src="assets/js/sketch.js"></script>
 </body>
 </html>

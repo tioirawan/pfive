@@ -6,6 +6,7 @@ const fs = require("fs");
 const ProgressBar = require('progress');
 const https = require('https');
 const urlParser = require("url-parse");
+const templator = require("./templator");
 
 async function init(dir) {
     const usrDir = dir.split("/").pop();
@@ -49,7 +50,7 @@ async function init(dir) {
     // template string
     const htmlTemplate = fs.readFileSync(__dirname + "/../../templates/main.html", 'utf8');
     const cssTemplate = fs.readFileSync(__dirname + "/../../templates/style.css", 'utf8');
-    const jsTemplate = fs.readFileSync(__dirname + "/../../templates/script.js", 'utf8');
+    const jsTemplate = fs.readFileSync(__dirname + "/../../templates/sketch.js", 'utf8');
 
     const assetsDir = path.join(dir, "assets");
     const jsDir = path.join(assetsDir, "js");
@@ -65,9 +66,9 @@ async function init(dir) {
         fs.mkdirSync(cssDir);
     }
 
-    fs.writeFileSync(path.join(dir, usrPackage.main), htmlTemplate);
+    fs.writeFileSync(path.join(dir, usrPackage.main), templator.compileHTML(htmlTemplate, usrPackage.lib));
     fs.writeFileSync(path.join(assetsDir, "css", "style.css"), cssTemplate);
-    fs.writeFileSync(path.join(assetsDir, "js", "script.js"), jsTemplate);
+    fs.writeFileSync(path.join(assetsDir, "js", "sketch.js"), jsTemplate);
     fs.writeFileSync(path.join(dir, "pfive.json"), JSON.stringify(usrPackage, null, 2));
     console.log(chalk.green("Done... now, type 'pfive install'"));
 }
