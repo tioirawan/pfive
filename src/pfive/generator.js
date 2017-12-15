@@ -13,7 +13,7 @@ async function init(dir) {
     const usrPackage = await inquirer.prompt([{
             type: "input",
             name: "name",
-            message: chalk.cyan("Package Name:"),
+            message: chalk.cyan("App Name:"),
             default: usrDir
         },
         {
@@ -66,7 +66,7 @@ async function init(dir) {
         fs.mkdirSync(cssDir);
     }
 
-    fs.writeFileSync(path.join(dir, usrPackage.main), templator.compileHTML(htmlTemplate, usrPackage.lib));
+    fs.writeFileSync(path.join(dir, usrPackage.main), templator.compileHTML(htmlTemplate, usrPackage.lib, usrPackage.name));
     fs.writeFileSync(path.join(assetsDir, "css", "style.css"), cssTemplate);
     fs.writeFileSync(path.join(assetsDir, "js", "sketch.js"), jsTemplate);
     fs.writeFileSync(path.join(dir, "pfive.json"), JSON.stringify(usrPackage, null, 2));
@@ -104,7 +104,7 @@ async function install(dir) {
 
     let libIndex = 0;
     if (pfive.lib.length) {
-        console.log(chalk.cyan("Downloading library...\n"));
+        console.log(chalk.cyan("Downloading libraries...\n"));
         download(libIndex);
     } else {
         console.log(chalk.yellow("No library found in pfive.json, try 'pfive add-lib'"));
