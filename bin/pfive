@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+
+require("../src/pfive/command").run((mess) => {
+    console.log(mess);
+});

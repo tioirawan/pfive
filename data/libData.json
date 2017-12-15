@@ -1,0 +1,9 @@
+{
+    "p5.js": "https://cdn.bootcss.com/p5.js/0.5.16/p5.min.js",
+    "p5.dom.js": "https://raw.githubusercontent.com/lmccart/p5.js/master/lib/addons/p5.dom.js",
+    "p5.sound.js": "https://raw.githubusercontent.com/processing/p5.js-sound/master/lib/p5.sound.js",
+    "p5.collide2d.js": "https://raw.githubusercontent.com/bmoren/p5.collide2D/master/p5.collide2d.min.js",
+    "rita.js": "http://rednoise.org/rita/download/rita.min.js",
+    "rita-small.js": "http://rednoise.org/rita/download/rita-small.min.js",
+    "rita-full.js": "http://rednoise.org/rita/download/rita-full.min.js"
+}
