@@ -35,7 +35,7 @@ module.exports.run = () => {
     program
         .command("prune")
         .alias("p")
-        .description("Delete unused libreries")
+        .description("Remove unused libraries")
         .action(() => generator.cleanUnusedLib(process.cwd()))
 
 
