@@ -1,6 +1,6 @@
 {
   "name": "pfive",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Simple p5 manager",
   "engines": {
     "node": ">=6.12.2"
@@ -16,9 +16,11 @@
   "license": "MIT",
   "dependencies": {
     "chalk": "^2.3.0",
+    "cheerio": "^1.0.0-rc.2",
     "commander": "^2.12.2",
+    "fs-extra": "^5.0.0",
     "inquirer": "^4.0.1",
-    "mustache": "^2.3.0",
+    "js-beautify": "^1.7.5",
     "progress": "^2.0.0",
     "url-parse": "^1.2.0"
   },

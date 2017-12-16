@@ -7,6 +7,7 @@ const ProgressBar = require('progress');
 const https = require('https');
 const urlParser = require("url-parse");
 const templator = require("./templator");
+const fsExtra = require('fs-extra');
 
 async function init(dir) {
     const usrDir = dir.split("/").pop();
@@ -66,7 +67,7 @@ async function init(dir) {
         fs.mkdirSync(cssDir);
     }
 
-    fs.writeFileSync(path.join(dir, usrPackage.main), templator.compileHTML(htmlTemplate, usrPackage.lib, usrPackage.name));
+    fs.writeFileSync(path.join(dir, usrPackage.main), templator.compileHTML(htmlTemplate, usrPackage));
     fs.writeFileSync(path.join(assetsDir, "css", "style.css"), cssTemplate);
     fs.writeFileSync(path.join(assetsDir, "js", "sketch.js"), jsTemplate);
     fs.writeFileSync(path.join(dir, "pfive.json"), JSON.stringify(usrPackage, null, 2));
@@ -88,19 +89,82 @@ async function addLib(dir) {
             }
         })
     }]);
+
+    const mainFile = path.join(dir, pfive.main);
     pfive.lib = usrLib.lib;
+
     fs.writeFileSync(path.join(dir, "pfive.json"), JSON.stringify(pfive, null, 2));
+
+    if (!fs.existsSync(mainFile)) {
+        console.log("Can't find main file");
+        return;
+    }
+
+    const mainHTML = fs.readFileSync(mainFile, 'utf8');
+
+    fs.writeFileSync(path.join(dir, pfive.main), templator.compileHTML(mainHTML, pfive));
     console.log(chalk.green("Done... now, type 'pfive install'"));
 }
 
-async function install(dir) {
+async function install(dir, offline = false) {
     checkJSON(dir);
+    // check connection
+    require('dns').resolve('www.google.com', (err) => {
+        if (offline || err) {
+            if (!offline) console.log("can't connect to the internet\ntrying offline installation...");
+            offlineInstall(dir);
+        } else {
+            onlineInstall(dir);
+        }
+    });
+}
+
+async function offlineInstall(dir) {
     const pfive = require(path.join(dir, "pfive.json"));
     const p5Lib = path.join(dir, "p5_lib");
 
     if (!fs.existsSync(p5Lib)) {
         fs.mkdirSync(p5Lib);
     }
+
+    cleanUnusedLib(dir);
+
+    if (pfive.lib.length) {
+        console.log(chalk.cyan("Installing libraries...\n"));
+    } else {
+        console.log(chalk.yellow("No library found in pfive.json, try 'pfive add-lib'"));
+    }
+
+    let libProcessed = 0;
+    let libErr = 0;
+    pfive.lib.forEach(lib => {
+        const libPath = path.join(__dirname, "../../lib", lib);
+        console.log(chalk.blue(`Installing ${lib}...`));
+        if (!fs.existsSync(libPath)) {
+            console.log(chalk.magenta("can't install " + lib + "\n "));
+            libErr++;
+            libProcessed++;
+            // skip :(
+            return;
+        }
+        fsExtra.copySync(libPath, path.join(p5Lib, lib));
+        console.log(chalk.green("Done...!\n"));
+        libProcessed++;
+    });
+
+    console.log(chalk.green(`Successfully installed: ${libProcessed - libErr}`) + " | " + chalk.red(`Error: ${libErr}`))
+    if (libErr) console.log(chalk.yellow("once you install a library with online mode, you can install it offline"));
+}
+
+async function onlineInstall(dir) {
+    const pfive = require(path.join(dir, "pfive.json"));
+    const p5Lib = path.join(dir, "p5_lib");
+
+    if (!fs.existsSync(p5Lib)) {
+        fs.mkdirSync(p5Lib);
+    }
+
+    cleanUnusedLib(dir);
 
     let libIndex = 0;
     if (pfive.lib.length) {
@@ -141,6 +205,8 @@ async function install(dir) {
             });
 
             res.on('end', function () {
+                // write file to pfive lib for local installation
+                fs.writeFileSync(path.join(__dirname, "../../lib", lib), data);
                 fs.writeFileSync(path.join(p5Lib, lib), data);
                 download(++libIndex)
             });
@@ -148,6 +214,24 @@ async function install(dir) {
 
         req.end();
     };
+}
+
+async function cleanUnusedLib(dir) {
+    checkJSON(dir);
+    const pfive = require(path.join(dir, "pfive.json"));
+    const libDir = path.join(dir, "p5_lib");
+    let libDeleted = 0;
+    fs.readdir(libDir, (err, files) => {
+        if (err) throw err;
+        for (const file of files) {
+            if (pfive.lib.includes(file)) continue;
+            console.log(chalk.yellow(`Deleting ${file}`));
+            fs.unlink(path.join(libDir, file), err => {
+                if (err) throw err;
+                libDeleted++;
+            });
+        }
+    });
 }
 
 async function checkJSON(dir) {
@@ -160,5 +244,6 @@ async function checkJSON(dir) {
 module.exports = {
     init,
     install,
-    addLib
+    addLib,
+    cleanUnusedLib
 }

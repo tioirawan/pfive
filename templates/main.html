@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="assets/css/style.css">
-    <title>{{appName}}</title>
+    <title></title>
 </head>
 <body>
     
-    {{#libs}}
-        <script src="{{{.}}}"></script>
-    {{/libs}}
-        <script src="assets/js/sketch.js"></script>
+    <!-- don't delete this div, it used for updating libraries -->
+    <div id="p5-lib">
+    </div>
+
+    <!-- edit this sketch.js file and do wathever you want -->
+    <script src="assets/js/sketch.js"></script>
 </body>
 </html>
