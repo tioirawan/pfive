@@ -1,7 +1,7 @@
 # PFive
 a simple p5 manager
 
-![](https://media.giphy.com/media/xT0xeKq8Tb9d1Kh9g4/giphy.gif)
+![](https://media.giphy.com/media/l3mZa8NdqpJPWiw8w/giphy.gif)
 
 ## installation
 

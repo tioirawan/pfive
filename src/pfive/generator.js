@@ -132,7 +132,7 @@ async function offlineInstall(dir) {
     if (pfive.lib.length) {
         console.log(chalk.cyan("Installing libraries...\n"));
     } else {
-        console.log(chalk.yellow("No library found in pfive.json, try 'pfive add-lib'"));
+        console.log(chalk.yellow("No library found in pfive.json, try 'pfive lib'"));
     }
 
     let libProcessed = 0;
@@ -171,7 +171,7 @@ async function onlineInstall(dir) {
         console.log(chalk.cyan("Downloading libraries...\n"));
         download(libIndex);
     } else {
-        console.log(chalk.yellow("No library found in pfive.json, try 'pfive add-lib'"));
+        console.log(chalk.yellow("No library found in pfive.json, try 'pfive lib'"));
     }
 
     function download(index) {
