@@ -21,7 +21,7 @@ a simple p5 manager
 
 ` $ pfive install `
 
-- to add another library, you can use `add-lib` command
+- to add another library, you can use `lib` command
 
-` $ pfive add-lib `
+` $ pfive lib `
 
