@@ -6,15 +6,12 @@ const beautify_html = require('js-beautify').html;
 module.exports.compileHTML = (html, data)=> {
     const $ = cheerio.load(html);
 
-    // change title
-    $("title").text(data.name);
+    $("title").text((i, t) => t === '{PACKAGE_NAME}'? data.name: t);
 
-    // remove all lbraries first
     for(lib of Object.keys(libData)){
         $(`#p5-lib #${lib.replace(/\./g, "-")}`).remove();
     }
 
-    // add libraries that selected
     for(lib of data.lib){
         const script = `<script id="${lib.replace(/\./g, "-")}" src="${path.join("p5_lib", lib)}"></script>`;
         $("#p5-lib").append(script);
