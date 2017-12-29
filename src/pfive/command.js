@@ -13,7 +13,14 @@ module.exports.run = () => {
 
     program
         .option('-v, --version', 'Show version', version)
-        .option("-o, --offline", "Offline installer");
+        .option('-o, --offline', "Offline installer, use with 'install' command");
+
+
+    program
+        .command("help")
+        .alias("h")
+        .description("Show this help message")
+        .action(() => program.help())
 
     program
         .command("init")
@@ -38,10 +45,9 @@ module.exports.run = () => {
         .description("Remove unused libraries")
         .action(() => generator.cleanUnusedLib(process.cwd()))
 
-
     program.parse(process.argv);
 
-    if (program.args.length < 1 ) {
-        console.log("try 'pfive -h' for help");
+    if (program.args.length < 1) {
+        console.log(`pfive version: ${program.version()}, 'pfive -h' for help`);
     }
 }
