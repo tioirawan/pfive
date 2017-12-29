@@ -4,24 +4,59 @@ const path = require("path");
 const libData = require("../../data/libData.json");
 const fs = require("fs");
 const ProgressBar = require('progress');
-const https = require('https');
-const urlParser = require("url-parse");
+const request = require('request');
 const templator = require("./templator");
 const fsExtra = require('fs-extra');
+const normalize = require('normalize-path');
+const dns = require('dns')
+const schema = require('validate');
 
-async function init(dir) {
-    const usrDir = dir.split("/").pop();
-    const usrPackage = await inquirer.prompt([{
+async function init(usrPath) {
+    const usrPackage = fs.existsSync(path.join(usrPath, 'pfive.json'))
+        ? await existingProject(usrPath)
+        : await newProject(usrPath)
+
+    fs.writeFileSync(path.join(usrPath, "pfive.json"), JSON.stringify(usrPackage, null, 2));
+
+    const htmlTemplate = path.join(usrPath, usrPackage.main) && fs.existsSync(path.join(usrPath, usrPackage.main))
+        ? fs.readFileSync(path.join(usrPath, usrPackage.main))
+        : fs.readFileSync(path.join(__dirname, "/../../templates/main.html"), 'utf8')
+
+    const cssTemplate = fs.readFileSync(path.join(__dirname, "/../../templates/style.css"), 'utf8');
+    const jsTemplate = fs.readFileSync(path.join(__dirname, "/../../templates/sketch.js"), 'utf8');
+
+    const jsDir = path.join(usrPath, "js");
+    const cssDir = path.join(usrPath, "css");
+
+    if (!fs.existsSync(jsDir)) {
+        fs.mkdirSync(jsDir);
+    }
+    if (!fs.existsSync(cssDir)) {
+        fs.mkdirSync(cssDir);
+    }
+
+    fs.writeFileSync(path.join(usrPath, usrPackage.main), templator.compileHTML(htmlTemplate, usrPackage));
+    fs.writeFileSync(path.join(cssDir, "style.css"), cssTemplate);
+    fs.writeFileSync(path.join(jsDir, "sketch.js"), jsTemplate);
+    print(chalk.green("Done... now, type 'pfive install'"));
+}
+
+async function newProject(usrPath) {
+    const usrDir = path.basename(normalize(usrPath));
+
+    return await inquirer.prompt([{
             type: "input",
             name: "name",
             message: chalk.cyan("App Name:"),
-            default: usrDir
+            default: usrDir,
+            validate: isStringEmpty
         },
         {
             type: "input",
             name: "main",
             message: chalk.yellow("Main file:"),
-            default: "index.html"
+            default: "index.html",
+            validate: isStringEmpty
         },
         {
             type: "input",
@@ -38,56 +73,69 @@ async function init(dir) {
             type: "checkbox",
             name: "lib",
             message: chalk.green("Lib:"),
-            choices: Object.keys(libData).map(lib => {
-                return {
-                    name: lib,
-                    value: lib,
-                    checked: lib == "p5.js" // default
-                }
-            })
+            choices: Object.keys(libData).map(lib => ({
+                name: lib,
+                value: lib,
+                checked: lib == "p5.js" // default
+            }))
         },
     ]);
+}
 
-    // template string
-    const htmlTemplate = fs.readFileSync(__dirname + "/../../templates/main.html", 'utf8');
-    const cssTemplate = fs.readFileSync(__dirname + "/../../templates/style.css", 'utf8');
-    const jsTemplate = fs.readFileSync(__dirname + "/../../templates/sketch.js", 'utf8');
-
-    const assetsDir = path.join(dir, "assets");
-    const jsDir = path.join(assetsDir, "js");
-    const cssDir = path.join(assetsDir, "css");
-
-    if (!fs.existsSync(assetsDir)) {
-        fs.mkdirSync(assetsDir);
-    }
-    if (!fs.existsSync(jsDir)) {
-        fs.mkdirSync(jsDir);
-    }
-    if (!fs.existsSync(cssDir)) {
-        fs.mkdirSync(cssDir);
-    }
-
-    fs.writeFileSync(path.join(dir, usrPackage.main), templator.compileHTML(htmlTemplate, usrPackage));
-    fs.writeFileSync(path.join(assetsDir, "css", "style.css"), cssTemplate);
-    fs.writeFileSync(path.join(assetsDir, "js", "sketch.js"), jsTemplate);
-    fs.writeFileSync(path.join(dir, "pfive.json"), JSON.stringify(usrPackage, null, 2));
-    console.log(chalk.green("Done... now, type 'pfive install'"));
+async function existingProject(usrPath) {
+    checkJSON(usrPath, false)
+    const pfive = await getPfive(usrPath);
+    return await inquirer.prompt([{
+            type: "input",
+            name: "name",
+            message: chalk.cyan("App Name:"),
+            default: pfive.name,
+            validate: isStringEmpty
+        },
+        {
+            type: "input",
+            name: "main",
+            message: chalk.yellow("Main file:"),
+            default: pfive.main,
+            validate: isStringEmpty
+        },
+        {
+            type: "input",
+            name: "version",
+            message: chalk.magenta("Version:"),
+            default: pfive.version
+        },
+        {
+            type: "input",
+            name: "description",
+            message: chalk.blue("Description:"),
+            default: pfive.description
+        },
+        {
+            type: "checkbox",
+            name: "lib",
+            message: chalk.green("Lib:"),
+            choices: Object.keys(libData).map(lib => ({
+                name: lib,
+                value: lib,
+                checked: pfive.lib.includes(lib)
+            }))
+        },
+    ])
 }
 
 async function addLib(dir) {
     checkJSON(dir);
-    const pfive = require(path.join(dir, "pfive.json"));
+    const pfive = await getPfive(dir);
     const usrLib = await inquirer.prompt([{
         type: "checkbox",
         name: "lib",
         message: chalk.green("Lib:"),
-        choices: Object.keys(libData).map(lib => {
-            return {
-                name: lib,
-                value: lib,
-                checked: pfive.lib.includes(lib)
-            }
-        })
+        choices: Object.keys(libData).map(lib => ({
+            name: lib,
+            value: lib,
+            checked: pfive.lib.includes(lib)
+        }))
     }]);
 
     const mainFile = path.join(dir, pfive.main);
@@ -96,22 +144,22 @@ async function addLib(dir) {
     fs.writeFileSync(path.join(dir, "pfive.json"), JSON.stringify(pfive, null, 2));
 
     if (!fs.existsSync(mainFile)) {
-        console.log("Can't find main file");
+        print("Can't find main file");
         return;
     }
 
     const mainHTML = fs.readFileSync(mainFile, 'utf8');
 
     fs.writeFileSync(path.join(dir, pfive.main), templator.compileHTML(mainHTML, pfive));
-    console.log(chalk.green("Done... now, type 'pfive install'"));
+    print(chalk.green("Done... now, type 'pfive install'"));
 }
 
 async function install(dir, offline = false) {
     checkJSON(dir);
     // check connection
-    require('dns').resolve('www.google.com', (err) => {
+    dns.resolve('www.google.com', err => {
         if (offline || err) {
-            if (!offline) console.log("can't connect to the internet\ntrying offline installation...");
+            if (!offline) print("can't connect to the internet\ntrying offline installation...");
             offlineInstall(dir);
         } else {
             onlineInstall(dir);
@@ -120,7 +168,7 @@ async function install(dir, offline = false) {
 }
 
 async function offlineInstall(dir) {
-    const pfive = require(path.join(dir, "pfive.json"));
+    const pfive = await getPfive(dir);
     const p5Lib = path.join(dir, "p5_lib");
 
     if (!fs.existsSync(p5Lib)) {
@@ -130,34 +178,33 @@ async function offlineInstall(dir) {
     cleanUnusedLib(dir);
 
     if (pfive.lib.length) {
-        console.log(chalk.cyan("Installing libraries...\n"));
+        print(chalk.cyan("Installing libraries...\n"));
     } else {
-        console.log(chalk.yellow("No library found in pfive.json, try 'pfive lib'"));
+        print(chalk.yellow("No library found in pfive.json, try 'pfive lib'"));
     }
 
     let libProcessed = 0;
     let libErr = 0;
     pfive.lib.forEach(lib => {
         const libPath = path.join(__dirname, "../../lib", lib);
-        console.log(chalk.blue(`Installing ${lib}...`));
+        print(chalk.blue(`Installing ${lib}...`));
         if (!fs.existsSync(libPath)) {
-            console.log(chalk.magenta("can't install " + lib + "\n "));
+            print(chalk.magenta(`can't install ${lib}\n`));
             libErr++;
             libProcessed++;
-            // skip :(
             return;
         }
         fsExtra.copySync(libPath, path.join(p5Lib, lib));
-        console.log(chalk.green("Done...!\n"));
+        print(chalk.green("Done...!\n"));
         libProcessed++;
     });
 
-    console.log(chalk.green(`Successfully installed: ${libProcessed - libErr}`) + " | " + chalk.red(`Error: ${libErr}`))
-    if (libErr) console.log(chalk.yellow("once you install a library with online mode, you can install it offline"));
+    print(chalk.green(`Successfully installed: ${libProcessed - libErr}`) + " | " + chalk.red(`Error: ${libErr}`))
+    if (libErr) print(chalk.yellow("once you install a library with online mode, you can install it offline"));
 }
 
 async function onlineInstall(dir) {
-    const pfive = require(path.join(dir, "pfive.json"));
+    const pfive = await getPfive(dir);
     const p5Lib = path.join(dir, "p5_lib");
 
     if (!fs.existsSync(p5Lib)) {
@@ -168,27 +215,23 @@ async function onlineInstall(dir) {
 
     let libIndex = 0;
     if (pfive.lib.length) {
-        console.log(chalk.cyan("Downloading libraries...\n"));
+        print(chalk.cyan("Downloading libraries...\n"));
         download(libIndex);
     } else {
-        console.log(chalk.yellow("No library found in pfive.json, try 'pfive lib'"));
+        print(chalk.yellow("No library found in pfive.json, try 'pfive lib'"));
     }
 
     function download(index) {
         if (libIndex >= pfive.lib.length) {
-            console.log(chalk.green("\nDone!"))
+            console.log();
+            print(chalk.green("Done!"));
             return;
         };
-        const lib = pfive.lib[index];
 
-        const url = new urlParser(libData[lib]);
+        const lib = pfive.lib[index];
         let data = '';
 
-        const req = https.request({
-            host: url.host,
-            port: 443,
-            path: url.pathname
-        });
+        const req = request(libData[lib]);
 
         req.on('response', function (res) {
             const len = parseInt(res.headers['content-length'], 10);
@@ -218,14 +261,14 @@ async function onlineInstall(dir) {
 
 async function cleanUnusedLib(dir) {
     checkJSON(dir);
-    const pfive = require(path.join(dir, "pfive.json"));
+    const pfive = await getPfive(dir);
     const libDir = path.join(dir, "p5_lib");
     let libDeleted = 0;
     fs.readdir(libDir, (err, files) => {
         if (err) throw err;
         for (const file of files) {
             if (pfive.lib.includes(file)) continue;
-            console.log(chalk.yellow(`Deleting ${file}`));
+            print(chalk.yellow(`Deleting ${file}`));
             fs.unlink(path.join(libDir, file), err => {
                 if (err) throw err;
                 libDeleted++;
@@ -234,11 +277,42 @@ async function cleanUnusedLib(dir) {
     });
 }
 
-async function checkJSON(dir) {
+async function checkJSON(dir, validate = true) {
     if (!fs.existsSync(path.join(dir, "pfive.json"))) {
-        console.log(chalk.red("cannot find find pfive.json, try 'pfive init'"));
+        print(chalk.red("cannot find find pfive.json, try 'pfive init'"));
         process.exit();
     }
+
+    if (validate) validatePfive(await getPfive(dir))
+}
+
+async function validatePfive(pfiveObj) {
+    const pfiveSchemaObj = readJSON(path.join(__dirname, '../../data/pfiveSchema.json'));
+    const error = schema(pfiveSchemaObj).validate(pfiveObj)
+
+    error.forEach(e => {
+        print(chalk.red(e.message));
+        print(chalk.green(`Repair with ${chalk.blue('pfive init')} command`));
+    })
+
+    // stop process because templator need some data from pfive.json
+    if (error.length) process.exit()
+}
+
+function print(mess) {
+    console.log(`${chalk.blue('~>')} ${mess}`)
+}
+
+async function getPfive(dir) {
+    return readJSON(path.join(dir, "pfive.json"));
+}
+
+function readJSON(dir) {
+    return JSON.parse(fs.readFileSync(dir))
+}
+
+function isStringEmpty(str) {
+    return str.trim().length > 0
 }
 
 module.exports = {
