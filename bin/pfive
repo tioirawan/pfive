@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+global.projectPath = process.cwd();
 require("../src/pfive/command").run((mess) => {
     console.log(mess);
 });
