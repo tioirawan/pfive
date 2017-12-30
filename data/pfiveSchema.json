@@ -2,16 +2,16 @@
     "name": {
         "type": "string",
         "required": true,
-        "message": "Name is required."
+        "message": "name is required!"
     },
     "main": {
         "type": "string",
         "required": true,
-        "message": "Main is required."
+        "message": "main is required!"
     },
     "lib": {
         "type": "array",
         "required": true,
-        "message": "Lib is required."   
+        "message": "lib is required!"   
     }
 }
