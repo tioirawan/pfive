@@ -17,6 +17,10 @@ function horizontalLine(char = "-", beforeLine = "", afterLine = "") {
     console.log(`${beforeLine}${char.repeat(length)}${afterLine}`);
 }
 
+function blueDim(str) {
+    return chalk.blue.bold.italic.dim(str);
+}
+
 async function getPfive(dir) {
     return await readJSON(path.join(dir, "pfive.json"));
 }
@@ -38,24 +42,39 @@ async function validatePfive(pfiveObj) {
 
     // stop process because templator need some data from pfive.json
     if (error.length) {
-        print(
-            chalk.green(
-                `Repair with ${chalk.blue.bold.italic.dim(
-                    "pfive init"
-                )} command`
-            )
-        );
+        print(chalk.green(`Repair with ${blueDim("pfive init")} command`));
         process.exit();
     }
 }
 
 async function checkJSON(dir, validate = true) {
     print(chalk.blue("Checking pfive.json..."));
-    if (!fs.existsSync(path.join(dir, "pfive.json"))) {
+
+    const pfivePath = path.join(dir, "pfive.json");
+
+    // check if file exist
+    if (!fs.existsSync(pfivePath)) {
         print(chalk.red("Cannot find find pfive.json, try 'pfive init'"));
         process.exit();
     }
 
+    // check parsing
+    try {
+        JSON.parse(fs.readFileSync(pfivePath));
+    } catch (error) {
+        print(chalk.red("Failed to parse JSON"));
+        print(chalk.gray(`${pfivePath}: ${chalk.yellow(error)}`));
+        print(
+            chalk.green(
+                `Check your pfive.json file or try ${blueDim(
+                    "pfive init -n"
+                )} command, ${blueDim("pfive help")} for more info`
+            )
+        );
+        process.exit();
+    }
+
+    // validate data
     if (validate) await validatePfive(await getPfive(dir));
 }
 
