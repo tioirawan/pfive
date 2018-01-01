@@ -1,6 +1,6 @@
 {
   "name": "pfive",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Simple p5 manager",
   "engines": {
     "node": ">=6.12.2"
@@ -19,12 +19,14 @@
     "chalk": "^2.3.0",
     "cheerio": "^1.0.0-rc.2",
     "commander": "^2.12.2",
+    "finalhandler": "^1.1.0",
     "fs-extra": "^5.0.0",
     "inquirer": "^4.0.1",
     "js-beautify": "^1.7.5",
     "normalize-path": "^2.1.1",
     "progress": "^2.0.0",
     "request": "^2.83.0",
+    "serve-static": "^1.13.1",
     "strip-ansi": "^4.0.0",
     "validate": "^3.0.1"
   },

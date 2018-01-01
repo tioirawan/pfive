@@ -7,6 +7,7 @@ const templator = require("./templator");
 const project = require("./project");
 const create = require("./fdcreate");
 const downloader = require("./downloader");
+const server = require("./server")
 
 const { generateTemplates } = require("./generator");
 const { print, getPfive, readJSON, checkJSON } = require("./utils");
@@ -148,9 +149,14 @@ async function cleanUnusedLib(dir) {
     });
 }
 
+async function serveHTTPServer(dir, port){
+    server.create(dir, parseInt(port));
+}
+
 module.exports = {
     init,
     install,
     addLib,
-    cleanUnusedLib
+    cleanUnusedLib,
+    serveHTTPServer
 };

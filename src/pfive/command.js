@@ -16,6 +16,10 @@ module.exports.run = () => {
         .option(
             "-n, --new",
             "Use with 'init' command to force pfive generate new project"
+        )
+        .option(
+            "-p, --port <port>",
+            "Use with 'serve' command to set port, default is 8080"
         );
 
     program
@@ -46,6 +50,12 @@ module.exports.run = () => {
         .alias("p")
         .description("Remove unused libraries")
         .action(() => main.cleanUnusedLib(process.cwd()));
+
+    program
+        .command("serve")
+        .alias("s")
+        .description("Run simple local server")
+        .action(() => main.serveHTTPServer(process.cwd(), program.port));
 
     program.parse(process.argv);
 
