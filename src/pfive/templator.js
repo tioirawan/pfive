@@ -21,8 +21,8 @@ module.exports.compileHTML = (html, data, usrJS, usrCSS, oldPfive = false) => {
         $(`#p5-lib #${lib.replace(/\./g, "-")}`).remove();
     }
 
-    if (usrJS) $("#main-script").attr("src", usrJS);
-    if (usrCSS) $("#main-style").attr("href", usrCSS);
+    if (usrJS) $("#main-script").attr("src", `js/${usrJS}`);
+    if (usrCSS) $("#main-style").attr("href", `css/${usrCSS}`);
 
     for (let lib of data.lib) {
         const script = `<script id="${lib.replace(
