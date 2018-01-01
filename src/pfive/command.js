@@ -1,5 +1,7 @@
 const program = require("commander");
-const generator = require("./generator");
+
+const main = require("./main");
+
 const { version, description } = require("../../package.json");
 
 module.exports.run = () => {
@@ -21,25 +23,25 @@ module.exports.run = () => {
     program
         .command("init")
         .description("Create pfive.json file")
-        .action(() => generator.init(process.cwd()));
+        .action(() => main.init(process.cwd()));
 
     program
         .command("install")
         .alias("i")
         .description("Install libraries from pfive.json")
-        .action(() => generator.install(process.cwd(), program.offline));
+        .action(() => main.install(process.cwd(), program.offline));
 
     program
         .command("lib")
         .alias("l")
         .description("Edit pfive.json libraries")
-        .action(() => generator.addLib(process.cwd()));
+        .action(() => main.addLib(process.cwd()));
 
     program
         .command("prune")
         .alias("p")
         .description("Remove unused libraries")
-        .action(() => generator.cleanUnusedLib(process.cwd()));
+        .action(() => main.cleanUnusedLib(process.cwd()));
 
     program.parse(process.argv);
 
