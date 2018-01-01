@@ -6,13 +6,13 @@ const inquirer = require("inquirer");
 
 const { isStringEmpty, print } = require("./utils");
 
-module.exports = async (
+async function create (
     type,
     fullPath,
     data,
     mess = "create",
     validate = true
-) => {
+) {
     const base = path.basename(normalize(fullPath));
     const dir = path.dirname(normalize(fullPath)) + "/";
     const relativePath = normalize(fullPath).replace(
@@ -57,10 +57,12 @@ module.exports = async (
             }
         ]);
 
-        return await this.create(
+        return await create(
             "file",
             path.join(dir, nameAnswer.newFileName),
             data
         );
     } else print(chalk.red("Abort..."));
 };
+
+module.exports = create;
