@@ -12,6 +12,10 @@ module.exports.run = () => {
         .option(
             "-o, --offline",
             "Offline installer, use with 'install' command"
+        )
+        .option(
+            "-n, --new",
+            "Use with 'init' command to force pfive generate new project"
         );
 
     program
@@ -23,7 +27,7 @@ module.exports.run = () => {
     program
         .command("init")
         .description("Create pfive.json file")
-        .action(() => main.init(process.cwd()));
+        .action(() => main.init(process.cwd(), program.new));
 
     program
         .command("install")

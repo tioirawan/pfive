@@ -11,16 +11,18 @@ const downloader = require("./downloader");
 const { generateTemplates } = require("./generator");
 const { print, getPfive, readJSON, checkJSON } = require("./utils");
 
-async function init(usrPath) {
+async function init(usrPath, newProject = false) {
     const isNewProject = !fs.existsSync(path.join(usrPath, "pfive.json"));
 
-    const usrPackage = isNewProject
-        ? await project.askNew(usrPath)
-        : await project.askExist(usrPath);
+    const usrPackage =
+        isNewProject || newProject
+            ? await project.askNew(usrPath)
+            : await project.askExist(usrPath);
 
-    const oldPfive = !isNewProject
-        ? await readJSON(path.join(usrPath, "pfive.json"), "utf8")
-        : false;
+    const oldPfive =
+        !isNewProject && !newProject
+            ? await readJSON(path.join(usrPath, "pfive.json"), "utf8")
+            : false;
 
     fs.writeFileSync(
         path.join(usrPath, "pfive.json"),
