@@ -12,16 +12,20 @@ a simple p5 manager
 
 ## usage
 
-- first, generate pfive.json, It's same like you make package.json file
+- first, generate pfive.json
 
 ` $ pfive init `
 
-- select the library you want to add
-- download all library with `install` command
+- select library you want to add
+- download all library with `install` command, add `-o` option for offline installation
 
 ` $ pfive install `
 
 - to add another library, you can use `lib` command
 
 ` $ pfive lib `
+
+- (beta)
+
+` $ pfive serve `
 
