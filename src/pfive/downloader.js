@@ -26,17 +26,23 @@ async function offline(dir) {
 
     let libProcessed = 0;
     let libErr = 0;
+
     pfive.lib.forEach(lib => {
         const libPath = path.join(__dirname, "../../lib", lib);
+
         print(chalk.blue(`Installing ${lib}...`));
+
         if (!fs.existsSync(libPath)) {
             print(chalk.magenta(chalk.red("\u2717"), `can't install ${lib}\n`));
             libErr++;
             libProcessed++;
             return;
         }
+
         fsExtra.copySync(libPath, path.join(p5Lib, lib));
+
         print(chalk.green("Installation Complete...! \u2713 \n"));
+
         libProcessed++;
     });
 
@@ -47,6 +53,7 @@ async function offline(dir) {
             " | " +
             chalk.red(`Error: ${libErr}`)
     );
+
     if (libErr) {
         print(
             chalk.yellow(
@@ -65,6 +72,7 @@ async function online(dir) {
     }
 
     let libIndex = 0;
+
     if (pfive.lib.length) {
         print(chalk.cyan("Downloading libraries...\n"));
         horizontalLine(chalk.blue("="), "", "\n");
@@ -81,12 +89,13 @@ async function online(dir) {
         }
 
         const lib = pfive.lib[index];
-        let data = "";
-
         const req = request(libData[lib]);
+
+        let data = "";
 
         req.on("response", res => {
             const len = parseInt(res.headers["content-length"], 10);
+
             const bar = new ProgressBar(
                 chalk.cyanBright(
                     `Downloading '${chalk.bold.italic.dim(lib)}' ${chalk.green(
@@ -108,15 +117,18 @@ async function online(dir) {
 
             res.on("end", () => {
                 print(chalk.blueBright(`Writing file to p5_lib/${lib}...`));
+
                 fs.writeFileSync(path.join(p5Lib, lib), data);
 
                 // write file to pfive lib for local installation
                 print(
                     chalk.blueBright("Creating cache for local installation...")
                 );
+
                 fs.writeFileSync(path.join(__dirname, "../../lib", lib), data);
 
                 print(chalk.green("Done...! \u2713 \n"));
+
                 download(++libIndex);
             });
         });

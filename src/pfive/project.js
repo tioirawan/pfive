@@ -101,7 +101,9 @@ async function askLib(pfive, ask = true) {
             checked: pfive.lib ? pfive.lib.includes(lib) : false
         }))
     };
+
     if (ask) return await inquirer.prompt([question]);
+
     return question;
 }
 

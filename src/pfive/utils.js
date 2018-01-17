@@ -8,7 +8,7 @@ function isStringEmpty(str) {
     return str.trim().length > 0;
 }
 
-function print(mess, before = "", after = "") {
+function print(mess = "", before = "", after = "") {
     console.log(`${before}${chalk.blue("~>")} ${mess}${after}`);
 }
 
@@ -31,9 +31,11 @@ async function readJSON(dir) {
 
 async function validatePfive(pfiveObj) {
     print(chalk.green("Validating pfive.json..."));
+
     const pfiveSchemaObj = await readJSON(
         path.join(__dirname, "../../data/pfiveSchema.json")
     );
+
     const error = schema(pfiveSchemaObj).validate(pfiveObj);
 
     error.forEach(e => {

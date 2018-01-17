@@ -33,6 +33,7 @@ async function init(usrPath, newProject = false) {
     // if sketch.js or style.css already exist, user can rename or overwrite
     let jsName;
     let cssName;
+
     if (isNewProject) {
         const resName = await generateTemplates(usrPath);
         jsName = resName.jsName;
@@ -68,10 +69,12 @@ async function init(usrPath, newProject = false) {
 
 async function addLib(dir) {
     await checkJSON(dir);
+
     const pfive = await getPfive(dir);
     const usrLib = await project.askLib(pfive);
 
     const mainFile = path.join(dir, pfive.main);
+
     pfive.lib = usrLib.lib;
 
     fs.writeFileSync(
@@ -90,11 +93,13 @@ async function addLib(dir) {
         path.join(dir, pfive.main),
         templator.compileHTML(mainHTML, pfive)
     );
+
     print(chalk.green("Done... now, type 'pfive install'"));
 }
 
 async function install(dir, offline = false) {
     await cleanUnusedLib(dir);
+
     console.log("");
 
     // check connection
@@ -113,6 +118,7 @@ async function install(dir, offline = false) {
 
 async function cleanUnusedLib(dir) {
     await checkJSON(dir);
+
     const pfive = await getPfive(dir);
     const libDir = path.join(dir, "p5_lib");
 
@@ -128,6 +134,7 @@ async function cleanUnusedLib(dir) {
 
         let libDeleted = 0;
         let libProcessed = 0;
+
         files.forEach(file => {
             if (!pfive.lib.includes(file)) {
                 print(chalk.yellow(`Deleting ${file}`));

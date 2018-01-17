@@ -6,15 +6,10 @@ const inquirer = require("inquirer");
 
 const { isStringEmpty, print } = require("./utils");
 
-async function create (
-    type,
-    fullPath,
-    data,
-    mess = "create",
-    validate = true
-) {
+async function create(type, fullPath, data, mess = "create", validate = true) {
     const base = path.basename(normalize(fullPath));
     const dir = path.dirname(normalize(fullPath)) + "/";
+
     const relativePath = normalize(fullPath).replace(
         normalize(global.projectPath),
         ""
@@ -63,6 +58,6 @@ async function create (
             data
         );
     } else print(chalk.red("Abort..."));
-};
+}
 
 module.exports = create;

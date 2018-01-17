@@ -31,6 +31,7 @@ module.exports.compileHTML = (html, data, usrJS, usrCSS, oldPfive = false) => {
             /\./g,
             "-"
         )}" src="${path.join("p5_lib", lib)}"></script>`;
+
         $("#p5-lib").append(script);
     }
 

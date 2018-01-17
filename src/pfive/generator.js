@@ -8,11 +8,14 @@ const { horizontalLine, print } = require("./utils");
 
 async function generateTemplates(dir) {
     print(chalk.green("Generating templates..."), "\n");
+
     horizontalLine(chalk.gray("="));
+
     const cssTemplate = fs.readFileSync(
         path.join(__dirname, "/../../templates/style.css"),
         "utf8"
     );
+
     const jsTemplate = fs.readFileSync(
         path.join(__dirname, "/../../templates/sketch.js"),
         "utf8"
@@ -31,6 +34,7 @@ async function generateTemplates(dir) {
         path.join(cssDir, "style.css"),
         cssTemplate
     );
+
     const jsName = await create(
         "file",
         path.join(jsDir, "sketch.js"),
