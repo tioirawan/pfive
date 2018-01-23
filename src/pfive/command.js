@@ -1,7 +1,5 @@
 const program = require("commander");
 
-const main = require("./main");
-
 const { version, description } = require("../../package.json");
 
 module.exports.run = () => {
@@ -31,31 +29,35 @@ module.exports.run = () => {
     program
         .command("init")
         .description("Create pfive.json file")
-        .action(() => main.init(process.cwd(), program.new));
+        .action(() => require("./main").init(process.cwd(), program.new));
 
     program
         .command("install")
         .alias("i")
         .description("Install libraries from pfive.json")
-        .action(() => main.install(process.cwd(), program.offline));
+        .action(() =>
+            require("./main").install(process.cwd(), program.offline)
+        );
 
     program
         .command("lib")
         .alias("l")
         .description("Edit pfive.json libraries")
-        .action(() => main.addLib(process.cwd()));
+        .action(() => require("./main").addLib(process.cwd()));
 
     program
         .command("prune")
         .alias("p")
         .description("Remove unused libraries")
-        .action(() => main.cleanUnusedLib(process.cwd()));
+        .action(() => require("./main").cleanUnusedLib(process.cwd()));
 
     program
         .command("serve")
         .alias("s")
         .description("Run simple local server")
-        .action(() => main.serveHTTPServer(process.cwd(), program.port));
+        .action(() =>
+            require("./main").serveHTTPServer(process.cwd(), program.port)
+        );
 
     program.parse(process.argv);
 

@@ -9,6 +9,16 @@
         "required": true,
         "message": "main is required!"
     },
+    "mainjs": {
+        "type": "string",
+        "required": true,
+        "message": "mainjs is required!"
+    },
+    "maincss": {
+        "type": "string",
+        "required": true,
+        "message": "maincss is required!"
+    },
     "lib": {
         "type": "array",
         "required": true,

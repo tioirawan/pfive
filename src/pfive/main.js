@@ -1,15 +1,10 @@
 const chalk = require("chalk");
 const path = require("path");
 const fs = require("fs");
-const dns = require("dns");
 
 const templator = require("./templator");
 const project = require("./project");
-const create = require("./fdcreate");
-const downloader = require("./downloader");
-const server = require("./server")
 
-const { generateTemplates } = require("./generator");
 const { print, getPfive, readJSON, checkJSON } = require("./utils");
 
 async function init(usrPath, newProject = false) {
@@ -25,20 +20,19 @@ async function init(usrPath, newProject = false) {
             ? await readJSON(path.join(usrPath, "pfive.json"), "utf8")
             : false;
 
+    usrPackage.mainjs = "js/sketch.js";
+    usrPackage.maincss = "css/style.css";
+
+    if (isNewProject) {
+        const resName = await require("./generator").generateTemplates(usrPath);
+        usrPackage.mainjs = resName.jsName;
+        usrPackage.maincss = resName.cssName;
+    }
+
     fs.writeFileSync(
         path.join(usrPath, "pfive.json"),
         JSON.stringify(usrPackage, null, 2)
     );
-
-    // if sketch.js or style.css already exist, user can rename or overwrite
-    let jsName;
-    let cssName;
-
-    if (isNewProject) {
-        const resName = await generateTemplates(usrPath);
-        jsName = resName.jsName;
-        cssName = resName.cssName;
-    }
 
     const htmlTemplate =
         path.join(usrPath, usrPackage.main) &&
@@ -49,17 +43,16 @@ async function init(usrPath, newProject = false) {
                   "utf8"
               );
 
-    await create(
+    await require("./fdcreate")(
         "file",
         path.join(usrPath, usrPackage.main),
         templator.compileHTML(
             htmlTemplate,
             usrPackage,
-            jsName,
-            cssName,
+            usrPackage.mainjs,
+            usrPackage.maincss,
             oldPfive
         ),
-        isNewProject ? "create" : "update",
         false
     );
 
@@ -100,10 +93,12 @@ async function addLib(dir) {
 async function install(dir, offline = false) {
     await cleanUnusedLib(dir);
 
+    const downloader = require("./downloader");
+
     console.log("");
 
     // check connection
-    dns.resolve("www.google.com", err => {
+    require("dns").resolve("www.google.com", err => {
         if (offline || err) {
             if (!offline) {
                 print(chalk.red("can't connect to the internet"));
@@ -156,8 +151,8 @@ async function cleanUnusedLib(dir) {
     });
 }
 
-async function serveHTTPServer(dir, port){
-    server.create(dir, parseInt(port));
+async function serveHTTPServer(dir, port) {
+    require("./server").create(dir, parseInt(port));
 }
 
 module.exports = {

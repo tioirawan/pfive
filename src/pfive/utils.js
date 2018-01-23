@@ -1,8 +1,6 @@
 const chalk = require("chalk");
-const stripAnsi = require("strip-ansi");
 const path = require("path");
 const fs = require("fs");
-const schema = require("validate");
 
 function isStringEmpty(str) {
     return str.trim().length > 0;
@@ -13,7 +11,9 @@ function print(mess = "", before = "", after = "") {
 }
 
 function horizontalLine(char = "-", beforeLine = "", afterLine = "") {
-    const length = Math.round(process.stdout.columns / stripAnsi(char).length);
+    const length = Math.round(
+        process.stdout.columns / require("strip-ansi")(char).length
+    );
     console.log(`${beforeLine}${char.repeat(length)}${afterLine}`);
 }
 
@@ -36,7 +36,7 @@ async function validatePfive(pfiveObj) {
         path.join(__dirname, "../../data/pfiveSchema.json")
     );
 
-    const error = schema(pfiveSchemaObj).validate(pfiveObj);
+    const error = require("validate")(pfiveSchemaObj).validate(pfiveObj);
 
     error.forEach(e => {
         print(chalk.red(e.message));

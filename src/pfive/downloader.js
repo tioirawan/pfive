@@ -1,9 +1,6 @@
 const path = require("path");
 const fs = require("fs");
 const chalk = require("chalk");
-const fsExtra = require("fs-extra");
-const ProgressBar = require("progress");
-const request = require("request");
 
 const libData = require("../../data/libData.json");
 
@@ -39,7 +36,7 @@ async function offline(dir) {
             return;
         }
 
-        fsExtra.copySync(libPath, path.join(p5Lib, lib));
+        require("fs-extra").copySync(libPath, path.join(p5Lib, lib));
 
         print(chalk.green("Installation Complete...! \u2713 \n"));
 
@@ -89,12 +86,13 @@ async function online(dir) {
         }
 
         const lib = pfive.lib[index];
-        const req = request(libData[lib]);
+        const req = require("request")(libData[lib]);
 
         let data = "";
 
         req.on("response", res => {
             const len = parseInt(res.headers["content-length"], 10);
+            const ProgressBar = require("progress");
 
             const bar = new ProgressBar(
                 chalk.cyanBright(

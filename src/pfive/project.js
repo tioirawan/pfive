@@ -1,14 +1,13 @@
 const path = require("path");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
-const normalize = require("normalize-path");
 
 const libData = require("../../data/libData.json");
 
 const { isStringEmpty, checkJSON, getPfive } = require("./utils");
 
 async function askNew(usrPath) {
-    const usrDir = path.basename(normalize(usrPath));
+    const usrDir = path.basename(require("normalize-path")(usrPath));
 
     return await inquirer.prompt([
         {

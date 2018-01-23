@@ -6,22 +6,25 @@ const inquirer = require("inquirer");
 
 const { isStringEmpty, print } = require("./utils");
 
-async function create(type, fullPath, data, mess = "create", validate = true) {
+async function create(type, fullPath, data, validate = true) {
     const base = path.basename(normalize(fullPath));
     const dir = path.dirname(normalize(fullPath)) + "/";
 
-    const relativePath = normalize(fullPath).replace(
-        normalize(global.projectPath),
-        ""
-    );
+    const mess = fs.existsSync(fullPath) ? "update" : "create";
 
-    if (!fs.existsSync(fullPath) || !validate) {
+    const relativePath = normalize(fullPath)
+        .replace(normalize(process.cwd()), "")
+        .slice(1);
+
+    if (mess === "create" || !validate) {
         print(`${chalk.cyan(`${mess} ${type}:`)} ${relativePath}`);
         type == "file"
             ? fs.writeFileSync(fullPath, data)
             : fs.mkdirSync(fullPath);
-        return base;
+        return `${relativePath}`;
     }
+
+    console.log(relativePath);
 
     const answer = await inquirer.prompt([
         {
@@ -41,7 +44,7 @@ async function create(type, fullPath, data, mess = "create", validate = true) {
             ? fs.writeFileSync(fullPath, data)
             : fs.mkdirSync(fullPath);
 
-        return base;
+        return `${relativePath}`;
     } else if (answer.action === "Rename") {
         const nameAnswer = await inquirer.prompt([
             {

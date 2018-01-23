@@ -1,12 +1,9 @@
-const cheerio = require("cheerio");
 const path = require("path");
 
 const libData = require("../../data/libData.json");
 
-const beautify_html = require("js-beautify").html;
-
 module.exports.compileHTML = (html, data, usrJS, usrCSS, oldPfive = false) => {
-    const $ = cheerio.load(html);
+    const $ = require("cheerio").load(html);
 
     $("title").text((i, t) => {
         if (t === "{PACKAGE_NAME}" || (oldPfive && t === oldPfive.name)) {
@@ -19,12 +16,10 @@ module.exports.compileHTML = (html, data, usrJS, usrCSS, oldPfive = false) => {
         $('<div id="p5-lib"></div>').appendTo("body");
     }
 
-    for (let lib of Object.keys(libData)) {
-        $(`#p5-lib #${lib.replace(/\./g, "-")}`).remove();
-    }
+    $("#p5-lib").html("");
 
-    if (usrJS) $("#main-script").attr("src", `js/${usrJS}`);
-    if (usrCSS) $("#main-style").attr("href", `css/${usrCSS}`);
+    if (usrJS) $("#main-script").attr("src", usrJS);
+    if (usrCSS) $("#main-style").attr("href", usrCSS);
 
     for (let lib of data.lib) {
         const script = `<script id="${lib.replace(
@@ -35,5 +30,5 @@ module.exports.compileHTML = (html, data, usrJS, usrCSS, oldPfive = false) => {
         $("#p5-lib").append(script);
     }
 
-    return beautify_html($.html(), { max_preserve_newlines: 1 });
+    return require("js-beautify").html($.html(), { max_preserve_newlines: 1 });
 };
