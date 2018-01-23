@@ -1,6 +1,6 @@
 {
   "name": "pfive",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Simple p5 manager",
   "engines": {
     "node": ">=6.12.2"
